@@ -13,12 +13,14 @@ function findOperationalSystem() {
 function decryptTecnoMineInitializer() {
     if [[ ! -f "$GPG_FILE" ]]; then
         echo -e "${vermelho}ERRO: Arquivo criptografado não encontrado.${reset}"
+        rm -rf "$INSTALL_DIR/$PROJECT_NAME"
         sleep 2
         exit 1
     fi
 
     if ! gpg -d "$GPG_FILE" > "$TRUE_FILE" 2>/dev/null; then
         echo -e "${vermelho}ERRO: Senha incorreta ou descriptografia falhou.${reset}"
+        rm -rf "$INSTALL_DIR/$PROJECT_NAME"
         sleep 2
         exit 1
     fi
