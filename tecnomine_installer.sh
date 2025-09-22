@@ -1,10 +1,29 @@
 INSTALL_DIR="${HOME}"
 TECNOMINE_REPO_URL="https://github.com/tecnotechs-eduardosousa/TecnoMine.git"
 
+GPG_FILE="$HOME/TecnoMine/Configs/redmine_initializer.sh.gpg"
+TRUE_FILE="$HOME/TecnoMine/Configs/redmine_initializer.sh"
+
 PROJECT_NAME="$(basename "$TECNOMINE_REPO_URL" .git)"
 
 function findOperationalSystem() {
     echo "$(uname)"
+}
+
+function decryptTecnoMineInitializer() {
+    if [[ ! -f "$GPG_FILE" ]]; then
+        echo -e "${vermelho}ERRO: Arquivo criptografado não encontrado.${reset}"
+        sleep 2
+        exit 1
+    fi
+
+    if ! gpg -d "$GPG_FILE" > "$TRUE_FILE" 2>/dev/null; then
+        echo -e "${vermelho}ERRO: Senha incorreta ou descriptografia falhou.${reset}"
+        sleep 2
+        exit 1
+    fi
+
+    echo -e "${verde}Arquivo descriptografado com sucesso!${reset}"
 }
 
 function installDependencies() {
@@ -106,6 +125,7 @@ function installTecnoMine() {
     fi
 
     installDependencies
+    decryptTecnoMineInitializer
 
     sleep 2
     tput reset
