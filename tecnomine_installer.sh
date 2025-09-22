@@ -39,6 +39,11 @@ function installDependencies() {
 
         echo -e "${laranja}Instalando lolcat...${reset}"
         brew install lolcat
+
+        echo ""
+
+        echo -e "${laranja}Instalando gnupg...${reset}"
+        brew install gnupg
     elif [[ "$OS" == "Linux" ]]; then
         echo ""
         echo -e "${laranja}Sistema Operacional: 🐧 Linux${reset}"
@@ -63,6 +68,11 @@ function installDependencies() {
 
             echo -e "${laranja}Instalando lolcat...${reset}"
             sudo apt install lolcat
+
+            echo ""
+
+            echo -e "${laranja}Instalando gnupg...${reset}"
+            sudo apt install gnupg
         else 
         fi
     else 
