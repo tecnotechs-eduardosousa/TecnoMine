@@ -43,6 +43,12 @@ function installDependencies() {
         fi
 
         echo ""
+
+        echo -e "${laranja}Instalando jq...${reset}"
+        brew install jq
+
+        echo ""
+
         echo -e "${laranja}Instalando figlet...${reset}"
         brew install figlet
 
@@ -72,6 +78,12 @@ function installDependencies() {
 
         if command -v apt &>/dev/null || command -v apt-get &>/dev/null; then
             sudo apt update
+
+            echo -e "${laranja}Instalando jq...${reset}"
+            sudo apt install jq
+
+            echo ""
+
             echo -e "${laranja}Instalando figlet...${reset}"
             sudo apt install -y figlet
 
