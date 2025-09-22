@@ -1,31 +1,3 @@
-REDMINE_API_KEY="2532354105f98a1c505270110ee9caa7e3e4ccd3"
-
-REDMINE_TICKET_STATUSES_URL="https://projetos.tecnotech.org/issue_statuses.json"
-
-function getRedmineTicketURL() {
-    local TICKET_NUMBER=$(getTicketNumber)
-
-    local REDMINE_TICKET_URL="https://projetos.tecnotech.org/issues/$TICKET_NUMBER.json?include=journals"
-
-    echo "$REDMINE_TICKET_URL"
-}
-
-function getRedmineCheckListsURL() {
-    local TICKET_NUMBER=$(getTicketNumber)
-
-    local REDMINE_TICKET_CHECKLISTS_URL="https://projetos.tecnotech.org/issues/$TICKET_NUMBER/checklists.json"
-
-    echo "$REDMINE_TICKET_CHECKLISTS_URL"
-}
-
-function getRedmineEstimatedTimeURL() {
-    local TICKET_NUMBER=$(getTicketNumber)
-
-    local REDMINE_TICKET_ESTIMATED_TIME_URL="https://projetos.tecnotech.org/time_entries.json?issue_id=$TICKET_NUMBER"
-
-    echo "$REDMINE_TICKET_ESTIMATED_TIME_URL"
-}
-
 function getTicketNumber() {
     local CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
@@ -98,7 +70,7 @@ function getJournalsData() {
 
 
 function getMajorAnalyzingDevelopingStatusId() {
-    local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$REDMINE_TICKET_STATUSES_URL")
+    local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
     if [[ -z "$RESPONSE" ]]; then
         echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}"
@@ -116,7 +88,7 @@ function getMajorAnalyzingDevelopingStatusId() {
 }
 
 function getMajorAwaitingAnalysisDevelopmentStatusId() {
-    local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$REDMINE_TICKET_STATUSES_URL")
+    local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
     if [[ -z "$RESPONSE" ]]; then
         echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}"
@@ -210,7 +182,7 @@ function sanitizeResponseFromASCII() {
 }
 
 function testApiRequest() {
-    local RESPONSE=$(curl -s -w "\n%{http_code}" -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$REDMINE_TICKET_STATUSES_URL")
+    local RESPONSE=$(curl -s -w "\n%{http_code}" -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
     HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 
