@@ -149,16 +149,3 @@ function installTecnoMine() {
     return 0
 }
 
-function updateTecnoMine() {
-    mkdir -p "$INSTALL_DIR"
-
-    echo -e "${laranja}Atualizando $PROJECT_NAME...${reset}"
-    echo ""
-    git -C "$INSTALL_DIR/$PROJECT_NAME" pull
-    echo ""
-    echo -e "${verde}$PROJECT_NAME foi atualizado com sucesso!"
-
-    sleep 2
-    tput reset
-    return 0
-}
