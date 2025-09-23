@@ -89,9 +89,11 @@ function getAnalyzingTicketTime(){
         echo "Total de transições: $COUNT"
         echo "Tempo total: ${TOTAL_IN_HOURS} horas"
 
-        echo -e "${magenta}Deseja enviar o tempo gasto em análise? (S/n) ${reset}"
+        echo ""
+
         local SEND_ANALYSIS_TIME
-        read -k 1 SEND_ANALYSIS_TIME
+        echo -ne "${laranja}Deseja enviar o tempo gasto em análise? (S/n) ${reset}"
+        read -q SEND_ANALYSIS_TIME
 
         if [[ "$SEND_ANALYSIS_TIME" == [Ss] ]]; then
             sendAnalyzingTicketTime "$TOTAL_IN_HOURS"
@@ -107,13 +109,13 @@ function getAnalyzingTicketTime(){
 function sendAnalyzingTicketTime() {
     local TOTAL_IN_HOURS="$1"
 
-    echo -e "${magenta}Deseja comentar algo? (S/n) ${reset}"
     local HAS_COMMENTARY
-    read -k 1 HAS_COMMENTARY
+    echo -ne "${laranja}Deseja comentar algo? (S/n) ${reset}"
+    read -q HAS_COMMENTARY
 
     local COMMENTARY
 
-    if [[ "$HAS_COMMENTARY" == [[Ss]] ]]; then
+    if [[ "$HAS_COMMENTARY" == [Ss] ]]; then
         echo -e "${azul}Digite o comentário: ${reset}"
         read -r COMMENTARY
     fi 
@@ -231,9 +233,9 @@ function getDevelopingTicketTime(){
         echo "Total de transições: $COUNT"
         echo "Tempo total: ${TOTAL_IN_HOURS} horas"
 
-        echo -e "${magenta}Deseja enviar o tempo gasto em desenvolvimento? (S/n)${reset}"
         local SEND_DEVELOPING_TIME
-        read -k 1 SEND_DEVELOPING_TIME
+        echo -ne "${laranja}Deseja enviar o tempo gasto em desenvolvimento? (S/n)${reset}"
+        read -q SEND_DEVELOPING_TIME
 
         if [[ "$SEND_DEVELOPING_TIME" == [Ss] ]]; then
             sendDevelopingTicketTime "$TOTAL_IN_HOURS"
@@ -249,9 +251,9 @@ function getDevelopingTicketTime(){
 function sendDevelopingTicketTime() {
     local TOTAL_IN_HOURS="$1"
 
-    echo -e "${magenta}Deseja comentar algo? (S/n)${reset}"
     local HAS_COMMENTARY
-    read -k 1 HAS_COMMENTARY
+    echo -ne "${laranja}Deseja comentar algo? (S/n)${reset}"
+    read -q HAS_COMMENTARY 
 
     local COMMENTARY
 
