@@ -67,8 +67,6 @@ function getJournalsData() {
     echo "$JOURNALS"
 }
 
-
-
 function getMajorAnalyzingDevelopingStatusId() {
     local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
@@ -112,8 +110,20 @@ function getSecondaryAnalyzingStatusName() {
     echo "$STATUS_NAME"
 }
 
+function getSecondaryAwaitingAnalysisStatusName() {
+    local STATUS_NAME="AGUARDANDO ANÁLISE"
+
+    echo "$STATUS_NAME"
+}
+
 function getSecondaryDevelopingStatusName() {
     local STATUS_NAME="EM DESENVOLVIMENTO"
+
+    echo "$STATUS_NAME"
+}
+
+function getSecondaryAwaitingDevelopmentStatusName() {
+    local STATUS_NAME="AGUARDANDO DESENVOLVIMENTO"
 
     echo "$STATUS_NAME"
 }
@@ -199,7 +209,11 @@ MAJOR_AWAITING_ANALYSIS_DEVELOPMENT_ID=$(getMajorAwaitingAnalysisDevelopmentStat
 CUSTOM_FIELD_STATUS_DEVELOPMENT_ID=$(getCustomFieldStatusDevelopmentId)
 
 SECONDARY_ANALYZING_STATUS_VALUE=$(getSecondaryAnalyzingStatusName)
+SECONDARY_AWAITING_ANALYSYS_STATUS_VALUE=$(getSecondaryAwaitingAnalysisStatusName)
+
 SECONDARY_DEVELOPING_STATUS_VALUE=$(getSecondaryDevelopingStatusName)
+SECONDARY_AWAITING_DEVELOPMENT_STATUS_VALUE=$(getSecondaryAwaitingDevelopmentStatusName)
+
 SECONDARY_HALTED_STATUS_VALUE=$(getSecondaryHaltedStatusName)
 
 ANALYSIS_ACTIVITY_ID=$(getAnalysisActivityId)
