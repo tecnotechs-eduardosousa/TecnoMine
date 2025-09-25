@@ -6,6 +6,8 @@ menu_principal=(
 )
 
 situacao_menu=(
+"5) AGUARDANDO ANÁLISE/DEV e AGUARDANDO DESENVOLVIMENTO"
+"4) AGUARDANDO ANÁLISE/DEV e AGUARDANDO ANÁLISE"
 "3) AGUARDANDO ANÁLISE/DEV e TEMPORARIAMENTE SUSPENSO (Outro Motivo)"
 "2) EM ANÁLISE/DEV e EM DESENVOLVIMENTO"
 "1) EM ANÁLISE/DEV e EM ANÁLISE"
@@ -73,7 +75,11 @@ function tecnomine(){
             "2) EM ANÁLISE/DEV e EM DESENVOLVIMENTO") setTicketToDeveloping
             break ;;
             "3) AGUARDANDO ANÁLISE/DEV e TEMPORARIAMENTE SUSPENSO (Outro Motivo)") setTicketToHalted
-             break ;;
+            break ;;
+            "4) AGUARDANDO ANÁLISE/DEV e AGUARDANDO ANÁLISE") setTicketToAwaitingAnalysis
+            break ;;
+            "5) AGUARDANDO ANÁLISE/DEV e AGUARDANDO DESENVOLVIMENTO") setTicketToAwaitingDevelopment
+            break ;;
             "1) Adicionar Tarefa") addTaskInChecklist
              break ;;
             "2) Visualizar Tarefas") seeChecklist
