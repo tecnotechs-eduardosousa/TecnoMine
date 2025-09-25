@@ -110,6 +110,7 @@ function sendAnalyzingTicketTime() {
     local TOTAL_IN_HOURS="$1"
 
     local HAS_COMMENTARY
+    echo ""
     echo -ne "${laranja}Deseja comentar algo? (S/n) ${reset}"
     read -q HAS_COMMENTARY
 
@@ -252,6 +253,7 @@ function sendDevelopingTicketTime() {
     local TOTAL_IN_HOURS="$1"
 
     local HAS_COMMENTARY
+    echo ""
     echo -ne "${laranja}Deseja comentar algo? (S/n)${reset}"
     read -q HAS_COMMENTARY 
 
