@@ -1,5 +1,4 @@
 
-
 function setTicketToAnalyzing() {
     testApiRequest
 
@@ -41,7 +40,46 @@ function setTicketToAnalyzing() {
     echo ""
 }
 
+function setTicketToAwaitingAnalysis() {
+    testApiRequest
 
+    local REDMINE_TICKET_URL=$(getRedmineTicketURL)
+
+    if [[ -z "$REDMINE_TICKET_URL" ]]; then 
+        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        sleep 2
+        return 1
+    fi
+
+    NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
+                    -H "Content-Type: application/json" \
+                    -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
+                    -d "{
+                        \"issue\": {
+                            \"status_id\": $MAJOR_AWAITING_ANALYSIS_DEVELOPMENT_ID,
+                            \"custom_fields\": [
+                                {\"id\": $CUSTOM_FIELD_STATUS_DEVELOPMENT_ID, \"value\": \"$SECONDARY_AWAITING_ANALYSYS_STATUS_VALUE\"}
+                            ]
+                        }
+                    }")
+
+    if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
+        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
+        sleep 3
+        return 1
+    fi
+
+    local TICKET_NUMBER=$(getTicketNumber)
+
+    echo ""
+    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    echo ""
+    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como aguardando análise! ${reset}"
+    echo ""
+    echo -e "Situação Definida: AGUARDANDO ANÁLISE / DEV"
+    echo -e "Situação de Desenvolvimento: AGUARDANDO ANÁLISE"
+    echo ""
+}
 
 
 function setTicketToDeveloping() {
@@ -85,6 +123,46 @@ function setTicketToDeveloping() {
     echo ""
 }
 
+function setTicketToAwaitingDevelopment() {
+    testApiRequest
+
+    local REDMINE_TICKET_URL=$(getRedmineTicketURL)
+
+    if [[ -z "$REDMINE_TICKET_URL" ]]; then 
+        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        sleep 2
+        return 1
+    fi
+
+    NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
+                    -H "Content-Type: application/json" \
+                    -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
+                    -d "{
+                        \"issue\": {
+                            \"status_id\": $MAJOR_AWAITING_ANALYSIS_DEVELOPMENT_ID,
+                            \"custom_fields\": [
+                                {\"id\": $CUSTOM_FIELD_STATUS_DEVELOPMENT_ID, \"value\": \"$SECONDARY_AWAITING_DEVELOPMENT_STATUS_VALUE\"}
+                            ]
+                        }
+                    }")
+
+    if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
+        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
+        sleep 3
+        return 1
+    fi
+
+    local TICKET_NUMBER=$(getTicketNumber)
+
+    echo ""
+    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    echo ""
+    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como aguardando desenvolvimento! ${reset}"
+    echo ""
+    echo -e "Situação Definida: AGUARDANDO ANÁLISE / DEV"
+    echo -e "Situação de Desenvolvimento: AGUARDANDO DESENVOLVIMENTO"
+    echo ""
+}
 
 
 function setTicketToHalted() {
