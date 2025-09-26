@@ -103,6 +103,24 @@ function getMajorAwaitingAnalysisDevelopmentStatusId() {
     echo "$STATUS_ID"
 }
 
+function getMajorAvailableForInternalTesting() {
+    local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
+
+    if [[ -z "$RESPONSE" ]]; then
+        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}"
+        sleep 2
+        return 1
+    fi
+
+    local SANITIZED_RESPONSE=$(sanitizeResponseFromASCII "$RESPONSE")
+
+    local STATUS_NAME="DISPONÍVEL EM TESTE INTERNO"
+
+    local STATUS_ID=$(echo "$SANITIZED_RESPONSE" | jq -r --arg name "$STATUS_NAME" '.issue_statuses[] | select(.name==$name) | .id')
+
+    echo "$STATUS_ID"
+}
+
 
 function getSecondaryAnalyzingStatusName() {
     local STATUS_NAME="EM ANÁLISE"
@@ -124,6 +142,12 @@ function getSecondaryDevelopingStatusName() {
 
 function getSecondaryAwaitingDevelopmentStatusName() {
     local STATUS_NAME="AGUARDANDO DESENVOLVIMENTO"
+
+    echo "$STATUS_NAME"
+}
+
+function getSecondaryFinishedDevelopment() {
+    local STATUS_NAME="DESENVOLVIMENTO CONCLUÍDO"
 
     echo "$STATUS_NAME"
 }
@@ -206,6 +230,8 @@ function testApiRequest() {
 MAJOR_ANALYZING_DEVELOPING_ID=$(getMajorAnalyzingDevelopingStatusId)
 MAJOR_AWAITING_ANALYSIS_DEVELOPMENT_ID=$(getMajorAwaitingAnalysisDevelopmentStatusId)
 
+MAJOR_AVAILABLE_FOR_INTERNAL_TESTING=$(getMajorAvailableForInternalTesting)
+
 CUSTOM_FIELD_STATUS_DEVELOPMENT_ID=$(getCustomFieldStatusDevelopmentId)
 
 SECONDARY_ANALYZING_STATUS_VALUE=$(getSecondaryAnalyzingStatusName)
@@ -213,6 +239,7 @@ SECONDARY_AWAITING_ANALYSYS_STATUS_VALUE=$(getSecondaryAwaitingAnalysisStatusNam
 
 SECONDARY_DEVELOPING_STATUS_VALUE=$(getSecondaryDevelopingStatusName)
 SECONDARY_AWAITING_DEVELOPMENT_STATUS_VALUE=$(getSecondaryAwaitingDevelopmentStatusName)
+SECONDARY_FINISHED_DEVELOPMENT_STATUS_VALUE=$(getSecondaryFinishedDevelopment)
 
 SECONDARY_HALTED_STATUS_VALUE=$(getSecondaryHaltedStatusName)
 
