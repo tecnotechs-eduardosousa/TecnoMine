@@ -35,13 +35,15 @@ function addTaskInChecklist(){
         echo ""
         echo -e "${magenta}Deseja criar outro checklist? (S/n) ${reset}"
         read -k 1 CREATE_NEW_CHECKLIST
+        echo ""
         
         setopt NULL_GLOB
-        if [[ "$CREATE_NEW_CHECKLIST" == "n" ]]; then
+
+        if [[ "$CREATE_NEW_CHECKLIST" == [Ss] ]]; then
+            continue
+        else
             break
         fi
-
-        continue
     done
 }
 

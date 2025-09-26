@@ -54,7 +54,8 @@ function dailyUpdateCheckerRoutine() {
 
     local USER_WILL_UPDATE
     echo -ne "${laranja}Deseja atualizar? (S/n)${reset}"
-    read -q USER_WILL_UPDATE
+    read -k 1 USER_WILL_UPDATE
+    echo ""
 
     if [[ "$USER_WILL_UPDATE" == [Ss] ]]; then
         tput reset

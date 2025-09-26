@@ -93,7 +93,9 @@ function getAnalyzingTicketTime(){
 
         local SEND_ANALYSIS_TIME
         echo -ne "${laranja}Deseja enviar o tempo gasto em análise? (S/n) ${reset}"
-        read -q SEND_ANALYSIS_TIME
+        read -k 1 SEND_ANALYSIS_TIME
+        echo ""
+
 
         if [[ "$SEND_ANALYSIS_TIME" == [Ss] ]]; then
             sendAnalyzingTicketTime "$TOTAL_IN_HOURS"
@@ -112,7 +114,8 @@ function sendAnalyzingTicketTime() {
     local HAS_COMMENTARY
     echo ""
     echo -ne "${laranja}Deseja comentar algo? (S/n) ${reset}"
-    read -q HAS_COMMENTARY
+    read -k 1 HAS_COMMENTARY
+    echo ""
 
     local COMMENTARY
 
@@ -236,7 +239,8 @@ function getDevelopingTicketTime(){
 
         local SEND_DEVELOPING_TIME
         echo -ne "${laranja}Deseja enviar o tempo gasto em desenvolvimento? (S/n)${reset}"
-        read -q SEND_DEVELOPING_TIME
+        read -k 1 SEND_DEVELOPING_TIME
+        echo ""
 
         if [[ "$SEND_DEVELOPING_TIME" == [Ss] ]]; then
             sendDevelopingTicketTime "$TOTAL_IN_HOURS"
@@ -255,7 +259,8 @@ function sendDevelopingTicketTime() {
     local HAS_COMMENTARY
     echo ""
     echo -ne "${laranja}Deseja comentar algo? (S/n)${reset}"
-    read -q HAS_COMMENTARY 
+    read -k 1 HAS_COMMENTARY
+    echo "" 
 
     local COMMENTARY
 
