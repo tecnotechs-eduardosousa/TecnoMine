@@ -10,15 +10,21 @@ function parse_data() {
     fi
 }
 
-function getAnalyzingTicketTime(){
+function getDevelopingTicketTime(){
+    show_loading "Analisando histórico do ticket" 1
+    
     local JOURNALS=$(getJournalsData)
 
     if [[ -z "$JOURNALS" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível verificar o histórico do Ticket.${reset}"
+        echo ""
+        print_error "Não foi possível verificar o histórico do Ticket."
         sleep 2
         tput reset
         return 1
     fi
+
+    show_loading "Calculando tempo em análise" 1
+    echo ""
 
     SITUATIONS_HISTORY=()
     
@@ -33,8 +39,9 @@ function getAnalyzingTicketTime(){
             ')
 
     if [[ ${#SITUATIONS_HISTORY[@]} -eq 0 ]]; then
-        echo "${vermelho}ERRO: Não foi possível extrair o histórico de situações.${reset}"
-        echo "Verifique se existe o campo 'Situação de Desenvolvimento' nos journals."
+        echo ""
+        print_error "Não foi possível extrair o histórico de situações."
+        print_info "Verifique se existe o campo 'Situação de Desenvolvimento' nos journals."
         sleep 2
         tput reset
         return 1
@@ -82,29 +89,36 @@ function getAnalyzingTicketTime(){
         local TOTAL_IN_HOURS=$(echo "scale=2; $TOTAL_SECONDS / 3600" | bc)
         
         if [[ "$TOTAL_IN_HOURS" -le 0 ]]; then
-            echo -e "${amarelo}AVISO: O tempo total em análise é menor ou igual a zero. ${reset}"
+            echo ""
+            print_warning "O tempo total em análise é menor ou igual a zero."
             return 1
         fi
 
-        echo "Total de transições: $COUNT"
-        echo "Tempo total: ${TOTAL_IN_HOURS} horas"
-
+        local TICKET_NUMBER=$(getTicketNumber)
+        
+        echo ""
+        print_header "TEMPO EM ANÁLISE - TICKET #${TICKET_NUMBER}" 70 "${azul}"
+        print_label "Transições detectadas" "$COUNT" "$cinza" "$branco"
+        print_label "Tempo total calculado" "$(format_time_duration $TOTAL_IN_HOURS)" "$cinza" "$verde"
+        echo ""
+        print_separator 70 "${cinza}"
         echo ""
 
         local SEND_ANALYSIS_TIME
-        echo -ne "${laranja}Deseja enviar o tempo gasto em análise? (S/n) ${reset}"
+        print_prompt "Deseja enviar o tempo gasto em análise? (S/n)"
         read -k 1 SEND_ANALYSIS_TIME
         echo ""
-
 
         if [[ "$SEND_ANALYSIS_TIME" == [Ss] ]]; then
             sendAnalyzingTicketTime "$TOTAL_IN_HOURS"
         else 
+            print_info "Operação cancelada."
             return 1
         fi
 
     else
-        echo -e "${vermelho}Nenhuma transição de 'EM ANÁLISE' encontrada. ${reset}"
+        echo ""
+        print_warning "Nenhuma transição de 'EM ANÁLISE' encontrada."
     fi
 }
 
@@ -113,21 +127,26 @@ function sendAnalyzingTicketTime() {
 
     local HAS_COMMENTARY
     echo ""
-    echo -ne "${laranja}Deseja comentar algo? (S/n) ${reset}"
+    print_prompt "Deseja adicionar um comentário? (S/n)"
     read -k 1 HAS_COMMENTARY
     echo ""
 
     local COMMENTARY
 
     if [[ "$HAS_COMMENTARY" == [Ss] ]]; then
-        echo -e "${azul}Digite o comentário: ${reset}"
+        echo ""
+        print_info "Digite o comentário:"
+        echo ""
         read -r COMMENTARY
     fi 
+
+    show_loading "Enviando tempo para o Redmine" 1
 
     local REDMINE_TICKET_ESTIMATED_TIME_URL=$(getRedmineEstimatedTimeURL)
 
     if [[ -z "$REDMINE_TICKET_ESTIMATED_TIME_URL" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível encontrar a seção de tempo estimado deste Ticket. ${reset}"
+        echo ""
+        print_error "Não foi possível encontrar a seção de tempo estimado deste Ticket."
         sleep 2
         tput reset
         return 1
@@ -145,7 +164,8 @@ function sendAnalyzingTicketTime() {
                     }")
 
     if [[ -z "$ANALYSIS_TIME" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível enviar o tempo de análise para o Ticket.${reset}"
+        echo ""
+        print_error "Não foi possível enviar o tempo de análise para o Ticket."
         sleep 2
         tput reset
         return 1
@@ -153,16 +173,21 @@ function sendAnalyzingTicketTime() {
 
     local TICKET_NUMBER=$(getTicketNumber)
 
-    echo -e "${verde}✅ Enviado o tempo de análise para o Ticket #$TICKET_NUMBER!"
+    echo ""
+    print_success "Tempo de análise enviado com sucesso para o Ticket #$TICKET_NUMBER! ${icon_celebrate}"
+    echo ""
 }
 
 
 
-function getDevelopingTicketTime(){
+function getAnalyzingTicketTime(){
+    show_loading "Analisando histórico do ticket" 1
+    
     local JOURNALS=$(getJournalsData)
 
     if [[ -z "$JOURNALS" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível verificar o histórico do Ticket.${reset}"
+        echo ""
+        print_error "Não foi possível verificar o histórico do Ticket."
         sleep 2
         tput reset
         return 1
@@ -181,8 +206,9 @@ function getDevelopingTicketTime(){
             ')
 
     if [[ ${#SITUATIONS_HISTORY[@]} -eq 0 ]]; then
-        echo "{$vermelho}ERRO: Não foi possível extrair o histórico de situações.${reset}"
-        echo "Verifique se existe o campo 'Situação de Desenvolvimento' nos journals."
+        echo ""
+        print_error "Não foi possível extrair o histórico de situações."
+        print_info "Verifique se existe o campo 'Situação de Desenvolvimento' nos journals."
         sleep 2
         tput reset
         return 1
@@ -230,26 +256,36 @@ function getDevelopingTicketTime(){
         local TOTAL_IN_HOURS=$(echo "scale=2; $TOTAL_SECONDS / 3600" | bc)
 
         if [[ "$TOTAL_IN_HOURS" -le 0 ]]; then
-            echo -e "${amarelo}AVISO: O tempo total de desenvolvimento é menor ou igual a zero.${reset}"
+            echo ""
+            print_warning "O tempo total de desenvolvimento é menor ou igual a zero."
             return 1
         fi
         
-        echo "Total de transições: $COUNT"
-        echo "Tempo total: ${TOTAL_IN_HOURS} horas"
+        local TICKET_NUMBER=$(getTicketNumber)
+        
+        echo ""
+        print_header "TEMPO EM DESENVOLVIMENTO - TICKET #${TICKET_NUMBER}" 70 "${amarelo}"
+        print_label "Transições detectadas" "$COUNT" "$cinza" "$branco"
+        print_label "Tempo total calculado" "$(format_time_duration $TOTAL_IN_HOURS)" "$cinza" "$verde"
+        echo ""
+        print_separator 70 "${cinza}"
+        echo ""
 
         local SEND_DEVELOPING_TIME
-        echo -ne "${laranja}Deseja enviar o tempo gasto em desenvolvimento? (S/n)${reset}"
+        print_prompt "Deseja enviar o tempo gasto em desenvolvimento? (S/n)"
         read -k 1 SEND_DEVELOPING_TIME
         echo ""
 
         if [[ "$SEND_DEVELOPING_TIME" == [Ss] ]]; then
             sendDevelopingTicketTime "$TOTAL_IN_HOURS"
         else 
+            print_info "Operação cancelada."
             return 1
         fi
 
     else
-        echo -e "${vermelho}Nenhuma transição de 'EM DESENVOLVIMENTO' encontrada.${reset}"
+        echo ""
+        print_warning "Nenhuma transição de 'EM DESENVOLVIMENTO' encontrada."
     fi
 }
 
@@ -258,25 +294,30 @@ function sendDevelopingTicketTime() {
 
     local HAS_COMMENTARY
     echo ""
-    echo -ne "${laranja}Deseja comentar algo? (S/n)${reset}"
+    print_prompt "Deseja adicionar um comentário? (S/n)"
     read -k 1 HAS_COMMENTARY
     echo "" 
 
     local COMMENTARY
 
-    if [[ "$HAS_COMMENTARY" == [[Ss]] ]]; then
-        echo -e "${azul}Digite o comentário:${reset}"
+    if [[ "$HAS_COMMENTARY" == [Ss] ]]; then
+        echo ""
+        print_info "Digite o comentário:"
+        echo ""
         read COMMENTARY
     fi 
 
     local REDMINE_TICKET_ESTIMATED_TIME_URL=$(getRedmineEstimatedTimeURL)
 
     if [[ -z "$REDMINE_TICKET_ESTIMATED_TIME_URL" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível encontrar a seção de tempo estimado deste Ticket.${reset}"
+        echo ""
+        print_error "Não foi possível encontrar a seção de tempo estimado deste Ticket."
         sleep 2
         tput reset
         return 1
     fi
+
+    show_loading "Enviando tempo de desenvolvimento" 1
 
     DEVELOPMENT_TIME=$(curl -s -X POST "$REDMINE_TICKET_ESTIMATED_TIME_URL" \
                     -H "Content-Type: application/json" \
@@ -290,7 +331,8 @@ function sendDevelopingTicketTime() {
                     }")
 
     if [[ -z "$DEVELOPMENT_TIME" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível enviar o tempo em desenvolvimento para o Ticket.${reset}"
+        echo ""
+        print_error "Não foi possível enviar o tempo em desenvolvimento para o Ticket."
         sleep 2
         tput reset
         return 1
@@ -298,5 +340,7 @@ function sendDevelopingTicketTime() {
 
     local TICKET_NUMBER=$(getTicketNumber)
 
-    echo -e "${verde}✅ Enviado o tempo em desenvolvimento para o Ticket #$TICKET_NUMBER!${reset}"
+    echo ""
+    print_success "Tempo de desenvolvimento enviado para o Ticket #$TICKET_NUMBER! ${icon_celebrate}"
+    echo ""
 }

@@ -5,10 +5,12 @@ function setTicketToAnalyzing() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        print_error "Não foi possível encontrar o Ticket no RedMine."
         sleep 2
         return 1
     fi
+
+    show_loading "Atualizando situação do ticket" 1
 
     NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
                     -H "Content-Type: application/json" \
@@ -23,20 +25,22 @@ function setTicketToAnalyzing() {
                     }")
 
     if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
-        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
-        sleep 3
+        echo ""
+        print_error "Falha ao tentar atualizar a situação do Ticket. (Código: $NEW_STATUS)"
+        sleep 2
         return 1
     fi
 
     local TICKET_NUMBER=$(getTicketNumber)
 
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    print_header "STATUS ATUALIZADO" 70 "${verde}"
+    print_success "O Ticket #$TICKET_NUMBER foi definido como em análise!"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como em análise! ${reset}"
+    print_label "Situação Principal" "EM ANÁLISE / DEV" "$cinza" "$azul"
+    print_label "Situação Desenvolvimento" "EM ANÁLISE" "$cinza" "$azul"
     echo ""
-    echo -e "Situação Definida: EM ANÁLISE / DEV."
-    echo -e "Situação de Desenvolvimento: EM ANÁLISE"
+    print_separator 70
     echo ""
 }
 
@@ -46,10 +50,12 @@ function setTicketToAwaitingAnalysis() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        print_error "Não foi possível encontrar o Ticket no RedMine."
         sleep 2
         return 1
     fi
+
+    show_loading "Atualizando situação do ticket" 1
 
     NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
                     -H "Content-Type: application/json" \
@@ -64,7 +70,7 @@ function setTicketToAwaitingAnalysis() {
                     }")
 
     if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
-        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
+        print_error "Falha ao tentar atualizar a situação do Ticket. (Código: $NEW_STATUS)"
         sleep 3
         return 1
     fi
@@ -72,12 +78,13 @@ function setTicketToAwaitingAnalysis() {
     local TICKET_NUMBER=$(getTicketNumber)
 
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    print_header "STATUS ATUALIZADO" 70 "${verde}"
+    print_success "O Ticket #$TICKET_NUMBER foi definido como em aguardando análise!"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como aguardando análise! ${reset}"
+    print_label "Situação Principal" "AGUARDANDO ANÁLISE / DEV" "$cinza" "$azul"
+    print_label "Situação Desenvolvimento" "AGUARDANDO ANÁLISE" "$cinza" "$azul"
     echo ""
-    echo -e "Situação Definida: AGUARDANDO ANÁLISE / DEV"
-    echo -e "Situação de Desenvolvimento: AGUARDANDO ANÁLISE"
+    print_separator 70
     echo ""
 }
 
@@ -87,10 +94,12 @@ function setTicketToFeedbackAndFinishedAnalysis() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        print_error "Não foi possível encontrar o Ticket no RedMine."
         sleep 2
         return 1
     fi
+
+    show_loading "Atualizando situação do ticket" 1
 
     NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
                     -H "Content-Type: application/json" \
@@ -105,7 +114,7 @@ function setTicketToFeedbackAndFinishedAnalysis() {
                     }")
 
     if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
-        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
+        print_error "Falha ao tentar atualizar a situação do Ticket. (Código: $NEW_STATUS)"
         sleep 3
         return 1
     fi
@@ -113,12 +122,13 @@ function setTicketToFeedbackAndFinishedAnalysis() {
     local TICKET_NUMBER=$(getTicketNumber)
 
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    print_header "STATUS ATUALIZADO" 70 "${verde}"
+    print_success "O Ticket #$TICKET_NUMBER foi definido como feedback!"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como feedback e análise concluída! ${reset}"
+    print_label "Situação Principal" "FEEDBACK" "$cinza" "$azul"
+    print_label "Situação Desenvolvimento" "ANÁLISE CONCLUIDA" "$cinza" "$azul"
     echo ""
-    echo -e "Situação Definida: FEEDBACK"
-    echo -e "Situação de Desenvolvimento: ANÁLISE CONCLUÍDA"
+    print_separator 70
     echo ""
 }
 
@@ -128,10 +138,12 @@ function setTicketToDeveloping() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        print_error "Não foi possível encontrar o Ticket no RedMine."
         sleep 2
         return 1
     fi
+
+    show_loading "Atualizando situação do ticket" 1
 
     NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
                     -H "Content-Type: application/json" \
@@ -146,20 +158,22 @@ function setTicketToDeveloping() {
                     }")
 
     if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
-        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
-        sleep 3
+        echo ""
+        print_error "Falha ao tentar atualizar a situação do Ticket. (Código: $NEW_STATUS)"
+        sleep 2
         return 1
     fi
 
     local TICKET_NUMBER=$(getTicketNumber)
 
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    print_header "STATUS ATUALIZADO" 70 "${verde}"
+    print_success "O Ticket #$TICKET_NUMBER foi definido como em desenvolvimento! ${icon_rocket}"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como em desenvolvimento! ${reset}"
+    print_label "Situação Principal" "EM ANÁLISE / DEV" "$cinza" "$amarelo"
+    print_label "Situação Desenvolvimento" "EM DESENVOLVIMENTO" "$cinza" "$amarelo"
     echo ""
-    echo -e "Situação Definida: EM ANÁLISE / DEV."    
-    echo -e "Situação de Desenvolvimento: EM DESENVOLVIMENTO"
+    print_separator 70
     echo ""
 }
 
@@ -169,10 +183,12 @@ function setTicketToAwaitingDevelopment() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        print_error "Não foi possível encontrar o Ticket no RedMine."
         sleep 2
         return 1
     fi
+
+    show_loading "Atualizando situação do ticket" 1
 
     NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
                     -H "Content-Type: application/json" \
@@ -187,7 +203,7 @@ function setTicketToAwaitingDevelopment() {
                     }")
 
     if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
-        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
+        print_error "Falha ao tentar atualizar a situação do Ticket. (Código: $NEW_STATUS)"
         sleep 3
         return 1
     fi
@@ -195,12 +211,13 @@ function setTicketToAwaitingDevelopment() {
     local TICKET_NUMBER=$(getTicketNumber)
 
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    print_header "STATUS ATUALIZADO" 70 "${verde}"
+    print_success "O Ticket #$TICKET_NUMBER foi definido como em desenvolvimento! ${icon_rocket}"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como aguardando desenvolvimento! ${reset}"
+    print_label "Situação Principal" "AGUARDANDO ANÁLISE / DEV" "$cinza" "$amarelo"
+    print_label "Situação Desenvolvimento" "AGUARDANDO DESENVOLVIMENTO" "$cinza" "$amarelo"
     echo ""
-    echo -e "Situação Definida: AGUARDANDO ANÁLISE / DEV"
-    echo -e "Situação de Desenvolvimento: AGUARDANDO DESENVOLVIMENTO"
+    print_separator 70
     echo ""
 }
 
@@ -210,10 +227,12 @@ function setTicketToAvailableForTestAndFinishedDevelopment() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        print_error "Não foi possível encontrar o Ticket no RedMine."
         sleep 2
         return 1
     fi
+
+    show_loading "Atualizando situação do ticket" 1
 
     NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
                     -H "Content-Type: application/json" \
@@ -228,20 +247,22 @@ function setTicketToAvailableForTestAndFinishedDevelopment() {
                     }")
 
     if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
-        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
-        sleep 3
+        echo ""
+        print_error "Falha ao tentar atualizar a situação do Ticket. (Código: $NEW_STATUS)"
+        sleep 2
         return 1
     fi
 
     local TICKET_NUMBER=$(getTicketNumber)
 
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    print_header "STATUS ATUALIZADO" 70 "${verde}"
+    print_success "O Ticket #$TICKET_NUMBER foi definido como disponível em teste interno! ${icon_celebrate}"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como disponível em teste interno e desenvolvimento concluído! ${reset}"
+    print_label "Situação Principal" "DISPONÍVEL EM TESTE INTERNO" "$cinza" "$verde"
+    print_label "Situação Desenvolvimento" "DESENVOLVIMENTO CONCLUÍDO" "$cinza" "$verde"
     echo ""
-    echo -e "Situação Definida: DISPONIVEL EM TESTE INTERNO"
-    echo -e "Situação de Desenvolvimento: DESENVOLVIMENTO CONCLUÍDO"
+    print_separator 70
     echo ""
 }
 
@@ -251,10 +272,12 @@ function setTicketToHalted() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        print_error "Não foi possível encontrar o Ticket no RedMine."
         sleep 2
         return 1
     fi
+
+    show_loading "Atualizando situação do ticket" 1
 
     NEW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$REDMINE_TICKET_URL" \
                     -H "Content-Type: application/json" \
@@ -269,7 +292,7 @@ function setTicketToHalted() {
                     }")
 
     if [[ -z "$NEW_STATUS" || "$NEW_STATUS" -ne 204 ]]; then
-        echo -e "${vermelho}ERRO {$NEW_STATUS}: Falha ao tentar atualizar a situação do Ticket. ${reset}"
+                print_error "Falha ao tentar atualizar a situação do Ticket. (Código: $NEW_STATUS)"
         sleep 3
         return 1
     fi
@@ -277,12 +300,13 @@ function setTicketToHalted() {
     local TICKET_NUMBER=$(getTicketNumber)
 
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
+    print_header "STATUS ATUALIZADO" 70 "${verde}"
+    print_success "O Ticket #$TICKET_NUMBER foi definido como temporariamente suspenso!"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como temporariamente suspenso! ${reset}"
+    print_label "Situação Principal" "AGUARDANDO ANÁLISE / DEV." "$cinza" "$verde"
+    print_label "Situação Desenvolvimento" "TEMPORARIAMENTE SUSPENSO (Outro Motivo)" "$cinza" "$verde"
     echo ""
-    echo -e "Situação Definida: AGUARDANDO ANÁLISE / DEV."
-    echo -e "Situação de Desenvolvimento: TEMPORARIAMENTE SUSPENSO (Outro Motivo)"    
+    print_separator 70
     echo ""
 }
 

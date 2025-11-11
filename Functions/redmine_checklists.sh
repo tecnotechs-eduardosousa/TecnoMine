@@ -5,10 +5,22 @@ function addTaskInChecklist(){
 
     testApiRequest
 
+    echo ""
+    print_header "ADICIONAR NOVA TAREFA" 70 "${verde}"
+    
     while true; do
-        echo -e "${magenta}Descreva a tarefa: ${reset}"
+        echo ""
+        print_prompt "Descreva a tarefa:"
+        echo ""
         local CHECKLIST_SUBJECT
         read CHECKLIST_SUBJECT
+        
+        if [[ -z "$CHECKLIST_SUBJECT" ]]; then
+            print_warning "A descrição não pode estar vazia!"
+            continue
+        fi
+        
+        show_loading "Criando tarefa" 1
         
         NEW_CHECKLIST=$(curl -s -X POST "$REDMINE_TICKET_CHECKLISTS_URL" \
                         -H "Content-Type: application/json" \
@@ -21,19 +33,22 @@ function addTaskInChecklist(){
                             }")
 
         if [[ -z "$NEW_CHECKLIST" ]]; then
-            echo -e "${vermelho}ERRO: Falha ao tentar criar checklist. ${reset}"
-            sleep 3
+            echo ""
+            print_error "Falha ao tentar criar checklist."
+            sleep 2
             return 1
         fi
 
         echo ""
-        echo -e "${laranja}TecnoMine Attendant:${reset}"
+        print_separator 70 "${verde}"
         echo ""
-        echo -e "${verde}O checklist foi criado com sucesso! ${reset}"
+        print_success "Tarefa adicionada com sucesso!"
         echo ""
-        echo -e "${roxo}Assunto: $CHECKLIST_SUBJECT ${reset}"
+        print_label "Descrição" "$CHECKLIST_SUBJECT" "$cinza" "$roxo"
         echo ""
-        echo -e "${magenta}Deseja criar outro checklist? (S/n) ${reset}"
+        print_separator 70 "${cinza}"
+        echo ""
+        print_prompt "Deseja criar outra tarefa? (S/n)"
         read -k 1 CREATE_NEW_CHECKLIST
         echo ""
         
@@ -52,27 +67,54 @@ function seeChecklist() {
 
     testApiRequest
 
+    show_loading "Carregando tarefas" 1
+    
     ALL_INFO_CHECKLISTS=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
                     "$REDMINE_TICKET_CHECKLISTS_URL" \
                     | jq .)
 
     if [[ -z "$ALL_INFO_CHECKLISTS" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível listar os tickets. ${reset}"
-        sleep 3
+        echo ""
+        print_error "Não foi possível listar as tarefas."
+        sleep 2
         return 1
     fi
 
+    local TICKET_NUMBER=$(getTicketNumber)
+    local total_tasks=$(echo "$ALL_INFO_CHECKLISTS" | jq '.checklists | length')
+    local completed_tasks=$(echo "$ALL_INFO_CHECKLISTS" | jq '[.checklists[] | select(.is_done==true or .is_done==1)] | length')
+    
     echo ""
-    echo -e "${laranja}TecnoMine Attendant:${reset}"
-    echo ""
-    echo -e "${rosa}Lista de Tarefas:${reset}"
-    echo ""
-
-    # printf '%s' "$CHECKLISTS" | jq -r '.checklists[] | "\(.id) \(.subject) \(.is_done)"'
-
-    printf '%s' "$ALL_INFO_CHECKLISTS" | jq -r '.checklists[] | "\(.id)\t\(.subject)\t\(.is_done)"' | while IFS=$'\t' read -r id subject is_done; do
-        echo -e "Assunto: $subject"
-        echo -e "Finalizado: $is_done"
+    print_header "CHECKLIST - TICKET #${TICKET_NUMBER}" 70 "${verde}"
+    
+    if [[ "$total_tasks" -eq 0 ]]; then
+        print_info "Nenhuma tarefa cadastrada ainda."
         echo ""
+        return 0
+    fi
+    
+    # Progress summary
+    print_label "Total de Tarefas" "$total_tasks" "$cinza" "$branco"
+    print_label "Concluídas" "$completed_tasks" "$cinza" "$verde"
+    print_label "Pendentes" "$((total_tasks - completed_tasks))" "$cinza" "$amarelo"
+    echo ""
+    
+    # Progress bar
+    if [[ "$total_tasks" -gt 0 ]]; then
+        print_progress_bar $completed_tasks $total_tasks 50
+        echo ""
+    fi
+    
+    echo ""
+    print_separator 70 "${ciano}"
+    echo ""
+    
+    # List all tasks with better formatting
+    printf '%s' "$ALL_INFO_CHECKLISTS" | jq -r '.checklists[] | "\(.id)\t\(.subject)\t\(.is_done)"' | while IFS=$'\t' read -r id subject is_done; do
+        format_checklist_item "$id" "$subject" "$is_done"
     done
+    
+    echo ""
+    print_separator 70 "${cinza}"
+    echo ""
 }

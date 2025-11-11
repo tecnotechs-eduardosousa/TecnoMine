@@ -29,42 +29,69 @@ function tecnomine(){
     local branch=$(git branch --show-current)
 
     if [[ -z "$branch" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível verificar a branch atual.${reset}"
+        print_error "Não foi possível verificar a branch atual."
         sleep 2
         tput reset
         return 1
     fi 
 
+    # Clear screen and show banner
+    clear
     echo ""
     figlet -f slant -c "TecnoMine" | lolcat -F 0.25 -p 20 -S 27
+    echo ""
+    print_info "Branch atual: ${bold}${verde}$branch${reset}"
+    echo ""
+    print_separator 70 "$ciano"
+    echo ""
 
     while true; do
         selection=$(printf '%s\n' "${menu_principal[@]}" \
-            | fzf --prompt="Selecione uma opção: " \
-                --height=40% \
-                --border)
+            | fzf --prompt="❯ Selecione uma opção: " \
+                --height=50% \
+                --border=rounded \
+                --border-label=" 🎯 Menu Principal " \
+                --border-label-pos=3 \
+                --color="border:cyan,label:cyan:bold,prompt:magenta:bold" \
+                --pointer="▶" \
+                --marker="✓")
 
         case $selection in
             "1) Situação do Ticket")
                 sub_option_selected=$(printf '%s\n' "${situacao_menu[@]}" \
-                    | fzf --prompt="Selecione uma opção: " \
-                        --height=40% \
-                        --border)
+                    | fzf --prompt="❯ Selecione a situação: " \
+                        --height=50% \
+                        --border=rounded \
+                        --border-label=" 📊 Situações do Ticket " \
+                        --border-label-pos=3 \
+                        --color="border:blue,label:blue:bold,prompt:magenta:bold" \
+                        --pointer="▶" \
+                        --marker="✓")
                 ;;
             "2) Checklist do Ticket")
                 sub_option_selected=$(printf '%s\n' "${checklist_menu[@]}" \
-                    | fzf --prompt="Selecione uma opção: " \
+                    | fzf --prompt="❯ Gerenciar checklist: " \
                         --height=40% \
-                        --border)
+                        --border=rounded \
+                        --border-label=" ✓ Checklist " \
+                        --border-label-pos=3 \
+                        --color="border:green,label:green:bold,prompt:magenta:bold" \
+                        --pointer="▶" \
+                        --marker="✓")
                 ;;
             "3) Tempo Estimado do Ticket")
                 sub_option_selected=$(printf '%s\n' "${tempo_menu[@]}" \
-                    | fzf --prompt="Selecione uma opção: " \
+                    | fzf --prompt="❯ Calcular tempo: " \
                         --height=40% \
-                        --border)
+                        --border=rounded \
+                        --border-label=" ⏱ Tempo Estimado " \
+                        --border-label-pos=3 \
+                        --color="border:yellow,label:yellow:bold,prompt:magenta:bold" \
+                        --pointer="▶" \
+                        --marker="✓")
                 ;;
             *)
-                echo -e "${vermelho} Opção inválida! O programa será encerrado. ${reset}"
+                print_error "Opção inválida! O programa será encerrado."
                 sleep 1
                 tput reset
                 return 1
@@ -95,13 +122,17 @@ function tecnomine(){
             "2) Tempo em Desenvolvimento") getDevelopingTicketTime
              break ;;
             *)
-                echo -e "${vermelho} Opção inválida! O programa será encerrado. ${reset}"
+                print_error "Opção inválida! O programa será encerrado."
                 sleep 1
                 tput reset
                 return 1
                 ;;
         esac
 
+        echo ""
+        print_success "Operação concluída com sucesso! ${icon_celebrate}"
+        echo ""
+        
         return 0
     done
 }
