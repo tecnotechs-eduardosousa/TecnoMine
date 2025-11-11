@@ -115,7 +115,31 @@ function getMajorAwaitingAnalysisDevelopmentStatusId() {
     echo "$STATUS_ID"
 }
 
-function getMajorAvailableForInternalTesting() {
+function getMajorFeedbackStatusId() {
+    local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
+
+    if [[ -z "$RESPONSE" ]]; then
+        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}" >&2
+        sleep 2
+        return 1
+    fi
+
+    local SANITIZED_RESPONSE=$(sanitizeResponseFromASCII "$RESPONSE")
+    
+    if [[ $? -ne 0 ]] || [[ -z "$SANITIZED_RESPONSE" ]]; then
+        echo -e "${vermelho}ERRO: Falha ao processar a resposta da API (resposta inválida). ${reset}" >&2
+        sleep 2
+        return 1
+    fi
+
+    local STATUS_NAME="FEEDBACK"
+
+    local STATUS_ID=$(echo "$SANITIZED_RESPONSE" | jq -r --arg name "$STATUS_NAME" '.issue_statuses[] | select(.name==$name) | .id')
+
+    echo "$STATUS_ID"
+}
+
+function getMajorAvailableForInternalTestingId() {
     local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
     if [[ -z "$RESPONSE" ]]; then
@@ -148,6 +172,12 @@ function getSecondaryAnalyzingStatusName() {
 
 function getSecondaryAwaitingAnalysisStatusName() {
     local STATUS_NAME="AGUARDANDO ANÁLISE"
+
+    echo "$STATUS_NAME"
+}
+
+function getSecondaryFinishedAnalysisStatusName() {
+    local STATUS_NAME="ANÁLISE CONCLUÍDA"
 
     echo "$STATUS_NAME"
 }
@@ -296,12 +326,14 @@ function testApiRequest() {
 MAJOR_ANALYZING_DEVELOPING_ID=$(getMajorAnalyzingDevelopingStatusId)
 MAJOR_AWAITING_ANALYSIS_DEVELOPMENT_ID=$(getMajorAwaitingAnalysisDevelopmentStatusId)
 
-MAJOR_AVAILABLE_FOR_INTERNAL_TESTING=$(getMajorAvailableForInternalTesting)
+MAJOR_FEEDBACK=$(getMajorFeedbackStatusId)
+MAJOR_AVAILABLE_FOR_INTERNAL_TESTING=$(getMajorAvailableForInternalTestingId)
 
 CUSTOM_FIELD_STATUS_DEVELOPMENT_ID=$(getCustomFieldStatusDevelopmentId)
 
 SECONDARY_ANALYZING_STATUS_VALUE=$(getSecondaryAnalyzingStatusName)
 SECONDARY_AWAITING_ANALYSYS_STATUS_VALUE=$(getSecondaryAwaitingAnalysisStatusName)
+SECONDARY_FINISHED_ANALYSIS_STATUS_VALUE=$(getSecondaryFinishedAnalysisStatusName)
 
 SECONDARY_DEVELOPING_STATUS_VALUE=$(getSecondaryDevelopingStatusName)
 SECONDARY_AWAITING_DEVELOPMENT_STATUS_VALUE=$(getSecondaryAwaitingDevelopmentStatusName)
