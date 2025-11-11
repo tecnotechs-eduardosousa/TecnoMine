@@ -10,7 +10,7 @@ function parse_data() {
     fi
 }
 
-function getDevelopingTicketTime(){
+function getAnalyzingTicketTime(){
     show_loading "Analisando histórico do ticket" 1
     
     local JOURNALS=$(getJournalsData)
@@ -180,7 +180,7 @@ function sendAnalyzingTicketTime() {
 
 
 
-function getAnalyzingTicketTime(){
+function getDevelopingTicketTime(){
     show_loading "Analisando histórico do ticket" 1
     
     local JOURNALS=$(getJournalsData)
