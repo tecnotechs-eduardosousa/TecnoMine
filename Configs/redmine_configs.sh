@@ -71,12 +71,18 @@ function getMajorAnalyzingDevelopingStatusId() {
     local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
     if [[ -z "$RESPONSE" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}"
+        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}" >&2
         sleep 2
         return 1
     fi
 
     local SANITIZED_RESPONSE=$(sanitizeResponseFromASCII "$RESPONSE")
+    
+    if [[ $? -ne 0 ]] || [[ -z "$SANITIZED_RESPONSE" ]]; then
+        echo -e "${vermelho}ERRO: Falha ao processar a resposta da API (resposta inválida). ${reset}" >&2
+        sleep 2
+        return 1
+    fi
 
     local STATUS_NAME="EM ANÁLISE / DEV."
 
@@ -89,12 +95,18 @@ function getMajorAwaitingAnalysisDevelopmentStatusId() {
     local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
     if [[ -z "$RESPONSE" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}"
+        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}" >&2
         sleep 2
         return 1
     fi
 
     local SANITIZED_RESPONSE=$(sanitizeResponseFromASCII "$RESPONSE")
+    
+    if [[ $? -ne 0 ]] || [[ -z "$SANITIZED_RESPONSE" ]]; then
+        echo -e "${vermelho}ERRO: Falha ao processar a resposta da API (resposta inválida). ${reset}" >&2
+        sleep 2
+        return 1
+    fi
 
     local STATUS_NAME="AGUARDANDO ANÁLISE / DEV."
 
@@ -107,12 +119,18 @@ function getMajorAvailableForInternalTesting() {
     local RESPONSE=$(curl -s -H "X-Redmine-API-Key: $REDMINE_API_KEY" "$ALL_REDMINE_STATUSES")
 
     if [[ -z "$RESPONSE" ]]; then
-        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}"
+        echo -e "${vermelho}ERRO: Não foi possível encontrar as situações do Ticket via RedMine. ${reset}" >&2
         sleep 2
         return 1
     fi
 
     local SANITIZED_RESPONSE=$(sanitizeResponseFromASCII "$RESPONSE")
+    
+    if [[ $? -ne 0 ]] || [[ -z "$SANITIZED_RESPONSE" ]]; then
+        echo -e "${vermelho}ERRO: Falha ao processar a resposta da API (resposta inválida). ${reset}" >&2
+        sleep 2
+        return 1
+    fi
 
     local STATUS_NAME="DISPONÍVEL EM TESTE INTERNO"
 
@@ -181,7 +199,7 @@ function getDevelopmentActivityId() {
 
 function callRedmineAPI() {
     if [[ -z "$REDMINE_API_KEY" ]]; then 
-        echo -e "${vermelho}ERRO: A chave de API do RedMine não foi informada. ${reset}"
+        echo -e "${vermelho}ERRO: A chave de API do RedMine não foi informada. ${reset}" >&2
         sleep 2
         return 1
     fi
@@ -189,7 +207,7 @@ function callRedmineAPI() {
     local REDMINE_TICKET_URL=$(getRedmineTicketURL)
 
     if [[ -z "$REDMINE_TICKET_URL" ]]; then 
-        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}"
+        echo -e "${vermelho}ERRO: Não foi possível encontrar o Ticket no RedMine. ${reset}" >&2
         sleep 2
         return 1
     fi
@@ -198,6 +216,12 @@ function callRedmineAPI() {
 
     local SANITIZED_RESPONSE=$(sanitizeResponseFromASCII "$RESPONSE")
     
+    if [[ $? -ne 0 ]] || [[ -z "$SANITIZED_RESPONSE" ]]; then
+        echo -e "${vermelho}ERRO: Resposta da API não é um JSON válido. ${reset}" >&2
+        sleep 2
+        return 1
+    fi
+    
     echo "$SANITIZED_RESPONSE" | jq .
 }
 
@@ -205,14 +229,56 @@ function sanitizeResponseFromASCII() {
     local RESPONSE="$1"
 
     if [[ -z "$RESPONSE" ]]; then
-        echo -e "${vermelho}ERRO: Não foi passado nenhum JSON para sanitização. ${reset}"
-        sleep 2
+        echo -e "${vermelho}ERRO: Resposta vazia da API.${reset}" >&2
         return 1
     fi
 
-    local SANITIZED_RESPONSE=$(echo "$RESPONSE" | tr -d '\000-\037')
+    if echo "$RESPONSE" | grep -qi "^[[:space:]]*<html\|^[[:space:]]*<!DOCTYPE"; then
+        echo -e "${vermelho}ERRO: API retornou HTML ao invés de JSON.${reset}" >&2
+        echo -e "${amarelo}AVISO: O acesso pode estar bloqueado por firewall/cache (GoCache).${reset}" >&2
+        echo -e "${amarelo}DICA: Verifique se você está conectado à VPN ou rede autorizada.${reset}" >&2
+        return 2
+    fi
+
+    if ! echo "$RESPONSE" | grep -q "^[[:space:]]*[\[{]"; then
+        echo -e "${vermelho}ERRO: Resposta não parece ser JSON válido.${reset}" >&2
+        return 1
+    fi
+
+    local SANITIZED_RESPONSE=$(echo "$RESPONSE" | tr -d '\000-\037' | sed 's/^\xEF\xBB\xBF//')
     
-    echo "$SANITIZED_RESPONSE"
+    if echo "$SANITIZED_RESPONSE" | jq empty >/dev/null 2>&1; then
+        echo "$SANITIZED_RESPONSE"
+        return 0
+    fi
+    
+    SANITIZED_RESPONSE=$(echo "$RESPONSE" | LC_ALL=C sed 's/[\x00-\x08\x0B\x0C\x0E-\x1F]//g' | sed 's/^\xEF\xBB\xBF//')
+    
+    if echo "$SANITIZED_RESPONSE" | jq empty >/dev/null 2>&1; then
+        echo "$SANITIZED_RESPONSE"
+        return 0
+    fi
+    
+    if command -v iconv >/dev/null 2>&1; then
+        SANITIZED_RESPONSE=$(echo "$RESPONSE" | iconv -c -f utf-8 -t utf-8 2>/dev/null | tr -d '\000-\037' | sed 's/^\xEF\xBB\xBF//')
+        
+        if echo "$SANITIZED_RESPONSE" | jq empty >/dev/null 2>&1; then
+            echo "$SANITIZED_RESPONSE"
+            return 0
+        fi
+    fi
+    
+    if command -v python3 >/dev/null 2>&1; then
+        SANITIZED_RESPONSE=$(echo "$RESPONSE" | python3 -c "import sys, json; data=sys.stdin.read(); print(json.dumps(json.loads(data)))" 2>/dev/null)
+        
+        if [[ $? -eq 0 ]] && [[ -n "$SANITIZED_RESPONSE" ]]; then
+            echo "$SANITIZED_RESPONSE"
+            return 0
+        fi
+    fi
+    
+    echo -e "${vermelho}ERRO: Não foi possível sanitizar o JSON.${reset}" >&2
+    return 1
 }
 
 function testApiRequest() {
