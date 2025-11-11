@@ -115,10 +115,10 @@ function setTicketToFeedbackAndFinishedAnalysis() {
     echo ""
     echo -e "${laranja}TecnoMine Attendant:${reset}"
     echo ""
-    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como disponível em teste interno e desenvolvimento concluído! ${reset}"
+    echo -e "${verde}O Ticket #$TICKET_NUMBER foi definido como feedback e análise concluída! ${reset}"
     echo ""
-    echo -e "Situação Definida: DISPONIVEL EM TESTE INTERNO"
-    echo -e "Situação de Desenvolvimento: DESENVOLVIMENTO CONCLUÍDO"
+    echo -e "Situação Definida: FEEDBACK"
+    echo -e "Situação de Desenvolvimento: ANÁLISE CONCLUÍDA"
     echo ""
 }
 
