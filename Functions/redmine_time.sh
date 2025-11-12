@@ -1,9 +1,30 @@
 
+typeset -g IS_GNU_DATE=""
+
+function init_date_parser() {
+    if [[ -z "$IS_GNU_DATE" ]]; then
+        IS_GNU_DATE=$((date --version >/dev/null 2>&1) && echo 0 || echo 1)
+    fi
+}
+
 function parse_data() {
     local INPUT="$1"
+    
+    init_date_parser
+    
+    if [[ $IS_GNU_DATE -eq 0 ]]; then
+        date -d "$INPUT" +%s
+    else 
+        date -j -f "%Y-%m-%dT%H:%M:%SZ" "$INPUT" +%s
+    fi
+}
 
-    local IS_GNU=$((date --version >/dev/null 2>&1) && echo 0 || echo 1)
-    if [[ $IS_GNU -eq 0 ]]; then
+function parse_data_fast() {
+    local INPUT="$1"
+    
+    init_date_parser
+    
+    if [[ $IS_GNU_DATE -eq 0 ]]; then
         date -d "$INPUT" +%s
     else 
         date -j -f "%Y-%m-%dT%H:%M:%SZ" "$INPUT" +%s
@@ -64,10 +85,13 @@ function getAnalyzingTicketTime(){
     local COUNT=0
     
     local MAX_CHANGED_TIMES_INDEX=${#CHANGED_TIMES[@]}
+    
     for ((i=1; i<=MAX_CHANGED_TIMES_INDEX; i++)); do
         if [[ $i -le ${#ANALYZING_TIME[@]} ]]; then
             local START_TIME="${ANALYZING_TIME[$i]}"
             local END_TIME="${CHANGED_TIMES[$i]}"
+            
+            [[ -z "$START_TIME" || -z "$END_TIME" ]] && continue
             
             # Converter para timestamp Unix
             local START_UNIX=$(parse_data "$START_TIME")
@@ -82,12 +106,26 @@ function getAnalyzingTicketTime(){
     done
     
     if [[ $COUNT -gt 0 ]]; then
-        # Converter total de segundos para horas (com decimais)
-        local TOTAL_IN_HOURS=$(echo "scale=2; $TOTAL_SECONDS / 3600" | bc)
-        
-        if [[ "$TOTAL_IN_HOURS" -le 0 ]]; then
+        if [[ $TOTAL_SECONDS -le 0 ]]; then
             echo ""
             print_warning "O tempo total em análise é menor ou igual a zero."
+            return 1
+        fi
+        
+        # Converter total de segundos para horas (com decimais)
+        local TOTAL_IN_HOURS=$(echo "scale=2; $TOTAL_SECONDS / 3600" | bc 2>&1)
+        
+        # Verificar se o resultado é válido
+        if [[ -z "$TOTAL_IN_HOURS" ]] || [[ "$TOTAL_IN_HOURS" == *"error"* ]]; then
+            echo ""
+            print_error "Erro ao calcular o tempo total em análise."
+            print_info "TOTAL_SECONDS: $TOTAL_SECONDS"
+            return 1
+        fi
+        
+        if ! [[ "$TOTAL_IN_HOURS" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+            echo ""
+            print_error "Tempo calculado inválido: '$TOTAL_IN_HOURS'"
             return 1
         fi
 
@@ -231,10 +269,13 @@ function getDevelopingTicketTime(){
     local COUNT=0
     
     local MAX_CHANGED_TIMES_INDEX=${#CHANGED_TIMES[@]}
+    
     for ((i=1; i<=MAX_CHANGED_TIMES_INDEX; i++)); do
         if [[ $i -le ${#DEVELOPING_TIME[@]} ]]; then
             local START_TIME="${DEVELOPING_TIME[$i]}"
             local END_TIME="${CHANGED_TIMES[$i]}"
+            
+            [[ -z "$START_TIME" || -z "$END_TIME" ]] && continue
             
             # Converter para timestamp Unix
             local START_UNIX=$(parse_data "$START_TIME")
@@ -249,12 +290,27 @@ function getDevelopingTicketTime(){
     done
     
     if [[ $COUNT -gt 0 ]]; then
-        # Converter total de segundos para horas (com decimais)
-        local TOTAL_IN_HOURS=$(echo "scale=2; $TOTAL_SECONDS / 3600" | bc)
-
-        if [[ "$TOTAL_IN_HOURS" -le 0 ]]; then
+        if [[ $TOTAL_SECONDS -le 0 ]]; then
             echo ""
             print_warning "O tempo total de desenvolvimento é menor ou igual a zero."
+            return 1
+        fi
+        
+        # Converter total de segundos para horas (com decimais)
+        local TOTAL_IN_HOURS=$(echo "scale=2; $TOTAL_SECONDS / 3600" | bc 2>&1)
+
+        # Verificar se o resultado é válido
+        if [[ -z "$TOTAL_IN_HOURS" ]] || [[ "$TOTAL_IN_HOURS" == *"error"* ]]; then
+            echo ""
+            print_error "Erro ao calcular o tempo total de desenvolvimento."
+            print_info "TOTAL_SECONDS: $TOTAL_SECONDS"
+            return 1
+        fi
+        
+        # Validate that TOTAL_IN_HOURS is a valid number
+        if ! [[ "$TOTAL_IN_HOURS" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+            echo ""
+            print_error "Tempo calculado inválido: '$TOTAL_IN_HOURS'"
             return 1
         fi
         
