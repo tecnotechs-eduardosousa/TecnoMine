@@ -205,10 +205,19 @@ function format_checklist_item() {
 function format_time_duration() {
     local hours="$1"
     
-    # Convert to hours and minutes
+    if [[ -z "$hours" ]] || ! [[ "$hours" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+        echo -e "${bold}0m${reset}"
+        return
+    fi
+    
     local h=${hours%.*}
-    local m=$(echo "($hours - $h) * 60" | bc)
+    
+    [[ -z "$h" ]] && h=0
+    
+    local m=$(echo "($hours - $h) * 60" | bc 2>/dev/null)
     m=${m%.*}
+    
+    [[ -z "$m" ]] && m=0
     
     if [[ $h -gt 0 ]]; then
         echo -e "${bold}${h}h ${m}m${reset}"
