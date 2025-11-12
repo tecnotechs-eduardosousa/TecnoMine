@@ -23,9 +23,6 @@ function getAnalyzingTicketTime(){
         return 1
     fi
 
-    show_loading "Calculando tempo em análise" 1
-    echo ""
-
     SITUATIONS_HISTORY=()
     
     while IFS= read -r line; do
