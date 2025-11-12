@@ -1,6 +1,7 @@
 
 menu_principal=(
-"3) Tempo Estimado do Ticket"
+"4) Tempo Restante Gasto no Ticket"
+"3) Tempo Total Gasto no Ticket"
 "2) Checklist do Ticket"
 "1) Situação do Ticket"
 )
@@ -20,9 +21,14 @@ checklist_menu=(
 "1) Adicionar Tarefa"
 )
 
-tempo_menu=(
+tempo_total_gasto=(
 "2) Tempo em Desenvolvimento"
 "1) Tempo em Análise"
+)
+
+tempo_restante=(
+"2) Tempo Restante em Desenvolvimento"
+"1) Tempo Restante em Análise"
 )
 
 function tecnomine(){    
@@ -79,12 +85,23 @@ function tecnomine(){
                         --pointer="▶" \
                         --marker="✓")
                 ;;
-            "3) Tempo Estimado do Ticket")
-                sub_option_selected=$(printf '%s\n' "${tempo_menu[@]}" \
+            "3) Tempo Total Gasto no Ticket")
+                sub_option_selected=$(printf '%s\n' "${tempo_total_gasto[@]}" \
                     | fzf --prompt="❯ Calcular tempo: " \
                         --height=40% \
                         --border=rounded \
-                        --border-label=" ⏱ Tempo Estimado " \
+                        --border-label=" ⏱ Tempo Total " \
+                        --border-label-pos=3 \
+                        --color="border:yellow,label:yellow:bold,prompt:magenta:bold" \
+                        --pointer="▶" \
+                        --marker="✓")
+                ;;
+            "4) Tempo Restante Gasto no Ticket")
+                sub_option_selected=$(printf '%s\n' "${tempo_total_gasto[@]}" \
+                    | fzf --prompt="❯ Calcular tempo restante: " \
+                        --height=40% \
+                        --border=rounded \
+                        --border-label=" ⏱ Tempo Restante " \
                         --border-label-pos=3 \
                         --color="border:yellow,label:yellow:bold,prompt:magenta:bold" \
                         --pointer="▶" \
@@ -120,6 +137,10 @@ function tecnomine(){
             "1) Tempo em Análise") getAnalyzingTicketTime
              break ;;
             "2) Tempo em Desenvolvimento") getDevelopingTicketTime
+             break ;;
+             "1) Tempo Restante em Análise") getRemainingAnalyzingTicketTime
+             break ;;
+             "2) Tempo Restante em Desenvolvimento") getRemainingDevelopingTicketTime
              break ;;
             *)
                 print_error "Opção inválida! O programa será encerrado."
