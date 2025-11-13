@@ -97,7 +97,7 @@ function tecnomine(){
                         --marker="✓")
                 ;;
             "4) Tempo Restante Gasto no Ticket")
-                sub_option_selected=$(printf '%s\n' "${tempo_total_gasto[@]}" \
+                sub_option_selected=$(printf '%s\n' "${tempo_restante[@]}" \
                     | fzf --prompt="❯ Calcular tempo restante: " \
                         --height=40% \
                         --border=rounded \
