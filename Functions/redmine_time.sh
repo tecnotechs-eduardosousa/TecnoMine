@@ -276,14 +276,18 @@ function getRemainingAnalyzingTicketTime() {
         local LOGGED_HOURS=$(echo "$TIME_ENTRIES" | jq -r --arg activity_id "$ANALYSIS_ACTIVITY_ID" '
             .time_entries[] | 
             select(.activity.id == ($activity_id | tonumber)) | 
-            .hours' | awk '{sum += $1} END {print sum}')
+            .hours' | awk '{sum += $1} END {print (sum == 0 || sum == "") ? 0 : sum}')
         
-        if [[ -z "$LOGGED_HOURS" || "$LOGGED_HOURS" == "null" ]]; then
+        if [[ -z "$LOGGED_HOURS" || "$LOGGED_HOURS" == "null" ]] || ! [[ "$LOGGED_HOURS" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
             LOGGED_HOURS="0"
         fi
         
         # Calcular o tempo restante
         local REMAINING_HOURS=$(echo "scale=2; $TOTAL_IN_HOURS - $LOGGED_HOURS" | bc 2>&1)
+        
+        if [[ "$REMAINING_HOURS" =~ ^\. ]]; then
+            REMAINING_HOURS="0$REMAINING_HOURS"
+        fi
         
         if [[ -z "$REMAINING_HOURS" ]] || [[ "$REMAINING_HOURS" == *"error"* ]]; then
             echo ""
@@ -634,13 +638,18 @@ function getRemainingDevelopingTicketTime() {
         local LOGGED_HOURS=$(echo "$TIME_ENTRIES" | jq -r --arg activity_id "$DEVELOPMENT_ACTIVITY_ID" '
             .time_entries[] | 
             select(.activity.id == ($activity_id | tonumber)) | 
-            .hours' | awk '{sum += $1} END {print sum}')
+            .hours' | awk '{sum += $1} END {print (sum == 0 || sum == "") ? 0 : sum}')
         
-        if [[ -z "$LOGGED_HOURS" || "$LOGGED_HOURS" == "null" ]]; then
+        if [[ -z "$LOGGED_HOURS" || "$LOGGED_HOURS" == "null" ]] || ! [[ "$LOGGED_HOURS" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
             LOGGED_HOURS="0"
         fi
         
         local REMAINING_HOURS=$(echo "scale=2; $TOTAL_IN_HOURS - $LOGGED_HOURS" | bc 2>&1)
+        
+        # Normalizar saída do bc (adicionar 0 inicial se começar com .)
+        if [[ "$REMAINING_HOURS" =~ ^\. ]]; then
+            REMAINING_HOURS="0$REMAINING_HOURS"
+        fi
         
         if [[ -z "$REMAINING_HOURS" ]] || [[ "$REMAINING_HOURS" == *"error"* ]]; then
             echo ""
