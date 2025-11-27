@@ -285,7 +285,9 @@ function getRemainingAnalyzingTicketTime() {
         # Calcular o tempo restante
         local REMAINING_HOURS=$(echo "scale=2; $TOTAL_IN_HOURS - $LOGGED_HOURS" | bc 2>&1)
         
-        if [[ "$REMAINING_HOURS" =~ ^\. ]]; then
+        if [[ "$REMAINING_HOURS" =~ ^-\. ]]; then
+            REMAINING_HOURS="-0.${REMAINING_HOURS#-.}"
+        elif [[ "$REMAINING_HOURS" =~ ^\. ]]; then
             REMAINING_HOURS="0$REMAINING_HOURS"
         fi
         
@@ -295,7 +297,19 @@ function getRemainingAnalyzingTicketTime() {
             return 1
         fi
         
-        local REMAINING_POSITIVE=$(echo "$REMAINING_HOURS > 0" | bc)
+        if ! [[ "$REMAINING_HOURS" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+            echo ""
+            print_error "Tempo restante calculado inválido: '$REMAINING_HOURS'"
+            return 1
+        fi
+        
+        local REMAINING_POSITIVE=$(echo "$REMAINING_HOURS > 0" | bc 2>/dev/null)
+        
+        if [[ -z "$REMAINING_POSITIVE" ]]; then
+            echo ""
+            print_error "Erro ao verificar tempo restante positivo."
+            return 1
+        fi
         
         local TICKET_NUMBER=$(getTicketNumber)
 
@@ -646,8 +660,10 @@ function getRemainingDevelopingTicketTime() {
         
         local REMAINING_HOURS=$(echo "scale=2; $TOTAL_IN_HOURS - $LOGGED_HOURS" | bc 2>&1)
         
-        # Normalizar saída do bc (adicionar 0 inicial se começar com .)
-        if [[ "$REMAINING_HOURS" =~ ^\. ]]; then
+        # Normalizar saída do bc (adicionar 0 inicial se começar com . ou -.)
+        if [[ "$REMAINING_HOURS" =~ ^-\. ]]; then
+            REMAINING_HOURS="-0.${REMAINING_HOURS#-.}"
+        elif [[ "$REMAINING_HOURS" =~ ^\. ]]; then
             REMAINING_HOURS="0$REMAINING_HOURS"
         fi
         
@@ -657,7 +673,21 @@ function getRemainingDevelopingTicketTime() {
             return 1
         fi
         
-        local REMAINING_POSITIVE=$(echo "$REMAINING_HOURS > 0" | bc)
+        # Validar que REMAINING_HOURS é um número válido antes de usar em bc
+        if ! [[ "$REMAINING_HOURS" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+            echo ""
+            print_error "Tempo restante calculado inválido: '$REMAINING_HOURS'"
+            return 1
+        fi
+        
+        local REMAINING_POSITIVE=$(echo "$REMAINING_HOURS > 0" | bc 2>/dev/null)
+        
+        # Verificar se bc retornou valor válido
+        if [[ -z "$REMAINING_POSITIVE" ]]; then
+            echo ""
+            print_error "Erro ao verificar tempo restante positivo."
+            return 1
+        fi
         
         local TICKET_NUMBER=$(getTicketNumber)
 
