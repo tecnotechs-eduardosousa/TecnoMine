@@ -51,8 +51,10 @@ function tecnomine(){
     print_separator 70 "$ciano"
     echo ""
 
+    local tecnomine_selection
+
     while true; do
-        selection=$(printf '%s\n' "${menu_principal[@]}" \
+        tecnomine_selection=$(printf '%s\n' "${menu_principal[@]}" \
             | fzf --prompt="❯ Selecione uma opção: " \
                 --height=50% \
                 --border=rounded \
@@ -62,7 +64,7 @@ function tecnomine(){
                 --pointer="▶" \
                 --marker="✓")
 
-        case $selection in
+        case $tecnomine_selection in
             "1) Situação do Ticket")
                 sub_option_selected=$(printf '%s\n' "${situacao_menu[@]}" \
                     | fzf --prompt="❯ Selecione a situação: " \
