@@ -14,7 +14,7 @@ function getTicketNumber() {
         return 1
     fi
 
-    local TICKET_NUMBER=$(echo "$CURRENT_BRANCH" | grep -oP '(?<=ticket-)[0-9]+')
+    local TICKET_NUMBER=$(echo "$CURRENT_BRANCH" | sed -n 's/.*ticket-\([0-9]*\).*/\1/p')
 
     if [[ -z "$TICKET_NUMBER" ]]; then 
         echo -e "${vermelho}ERRO: Não foi possível verificar o número do ticket. ${reset}"

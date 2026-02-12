@@ -106,7 +106,6 @@ function installDependencies() {
 
             echo -e "${laranja}Instalando gnupg...${reset}"
             sudo apt install gnupg
-        else 
         fi
     else 
         echo "${vermelho}Sistema não reconhecido: $OS${reset}"
