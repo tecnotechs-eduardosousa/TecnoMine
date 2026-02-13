@@ -84,8 +84,8 @@ function tm_fzf_select() {
     local min_height
 
     display_lines="$(tm_build_display_items "${items[@]}")"
-    preview_cmd="zsh -lc 'source \"${TECNO_MINE_FILES}/Configs/redmine_visual.sh\"; print_mascot_seal'"
-    seal_lines=$(print_mascot_seal | wc -l | tr -d ' ')
+    preview_cmd="zsh -lc 'source \"${TECNO_MINE_FILES}/Configs/redmine_visual.sh\"; print_mascot_fox'"
+    seal_lines=$(print_mascot_fox | wc -l | tr -d ' ')
     min_height="${TM_MENU_MIN_HEIGHT:-$((seal_lines + 4))}"
 
     printf '%s\n' "$display_lines" \
@@ -103,7 +103,7 @@ function tm_fzf_select() {
             --list-label-pos=0 \
             --info=inline-right \
             --info-command="echo Branch atual: ${branch}" \
-            --color="border:blue,label:blue:bold,prompt:blue:bold" \
+            --color="border:#d60000,label:#d60000:bold,prompt:#d60000:bold" \
             --pointer="▶" \
             --marker="✓" \
             --preview="$preview_cmd" \
